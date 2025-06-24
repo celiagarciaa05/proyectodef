@@ -1,0 +1,470 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+class Category {
+  + id : String = ""
+  + userId : String = ""
+  + nombre : String = ""
+}
+
+class Meta {
+  + id : String = ""
+  + userId : String = ""
+  + categoria : String = ""
+  + tipo : String = "" // "Ahorro" o "Gasto"
+  + cantidad : Double = 0.0
+  + fechaLimite : Long = 0L
+  + fechaCreacion : Long = System.currentTimeMillis() // timestamp
+  + estado : String = "Proceso"
+  + progreso : Float = 0f // "Proceso", "Completado", "Expirado"
+}
+
+class Transaction {
+  + id : String = ""
+  + userId : String = ""
+  + tipo : String = "" // "Ahorro" o "Gasto"
+  + fecha : Long = 0L // timestamp
+  + titulo : String = ""
+  + cantidad : Double = 0.0
+  + descripcion : String = ""
+  + categoria : String = ""
+}
+
+class User {
+  + userId : String = ""
+  + nombreCompleto : String = ""
+  + nombreUsuario : String = ""
+  + correo : String = ""
+  + dineroTotal : Double = 0.0
+  + password : String = ""
+  + photoUrl : String? = null
+}
+class AuthViewModel {
+  + isLoggedIn : Boolean
+  + user : StateFlow<User?>
+  + errorMessage : StateFlow<String?>
+  + successMessage : StateFlow<String?>
+  + result : Result<User>
+
+  + getSignInIntent()
+  + handleSignInResult()
+  + loginWithEmail()
+  + registerUser()
+  + signOut()
+  + updateUsernameAndPassword()
+  + updateDinero()
+  + updateUserProfile()
+  + setError()
+  + clearMessages()
+  + resetPassword()
+  + sendFirebasePasswordReset()
+}
+
+class TransactionViewModel {
+  + todasTransacciones : StateFlow<List<Transaction>>
+  + categorias : StateFlow<List<Category>>
+  + transaccionesPorCategoria : StateFlow<List<CategoriaConTotales>>
+  + transaccionesFiltradas : StateFlow<List<Transaction>>
+  + nombre : String
+  + totalAhorros : Double
+  + totalGastos : Double
+
+  + cargarCategorias()
+  + agregarCategoria()
+  + agregarTransaccion()
+  + cargarTransaccionesPorCategoria()
+  + cargarTransaccionesPorTipo()
+  + calcularProgresoMeta()
+  + cargarTodasTransacciones()
+  + eliminarTransaccion()
+}
+
+class MetaViewModel {
+  + metas : StateFlow<List<Meta>>
+
+  + cargarMetas()
+  + agregarMeta()
+  + marcarMetaComoCompletada()
+  + eliminarMeta()
+  + escucharCambiosMetas()
+}
+
+class ProgresoViewModel {
+  + progresoActual : Float
+  + calcularProgreso() : Float
+}
+
+class ChatViewModel {
+  + enviarPregunta()
+  + enviarPreguntaConContextoTotal()
+  + construirContextoFinanciero()
+}
+
+
+interface AuthRepository {
+  + getGoogleSignInIntent()
+  + handleSignInResult()
+  + loginWithEmail()
+  + registerUser()
+  + actualizarDineroUsuario()
+  + getUserFromFirestore()
+  + actualizarCampoUsuario()
+  + resetearCuentaUsuario()
+  + eliminarCuentaFirebase()
+  + signOut()
+}
+
+class AuthRepositoryImpl implements AuthRepository {
+  + activity : Activity
+
+  + getGoogleSignInIntent()
+  + handleSignInResult()
+  + loginWithEmail()
+  + registerUser()
+  + getUserFromFirestore()
+  + actualizarCampoUsuario()
+  + resetearCuentaUsuario()
+  + eliminarCuentaFirebase()
+  + signOut()
+  + actualizarDineroUsuario()
+}
+
+interface TransactionRepository {
+  + addTransaction()
+  + getUserCategories()
+  + addCategory()
+}
+
+class TransactionRepositoryImpl implements TransactionRepository {
+  + addTransaction()
+  + getUserCategories()
+  + addCategory()
+}
+
+interface MetaRepository {
+  + addMeta(meta: Meta) : Result<Unit>
+  + getMetas(userId: String) : List<Meta>
+  + deleteMeta(userId: String, metaId: String) : Result<Unit>
+  + updateMetaEstado(userId: String, metaId: String, nuevoEstado: String) : Result<Unit>
+}
+
+class MetaRepositoryImpl implements MetaRepository {
+  + addMeta()
+  + getMetas()
+  + deleteMeta()
+  + updateMetaEstado()
+}
+
+object ChatService {
+  + enviarPrompt()
+}
+
+
+
+
+
+class AppDrawer {
+  class AppDrawer {
+  + AppDrawer()
+  + DrawerMenuItem()
+}
+
+
+class BarraAgrupadaGrafico {
+  + BarraAgrupadaGrafico()
+}
+
+
+
+class CargaMasivaFirestore {
+}
+
+class PasswordResetManager {
+  + PasswordResetManager()
+}
+
+object ResumenPdfGenerator {
+  + generarYEnviar(context: Context, user: User, transacciones: List<DocumentSnapshot>, firestore: FirebaseFirestore)
+  - agregarEncabezado(doc: Document, fechaGeneracion: Long)
+  - agregarInformacionUsuario(doc: Document, user: User)
+  - agregarResumenEjecutivo(doc: Document, transacciones: List<DocumentSnapshot>, saldoActual: Double)
+  - agregarSeccionMetas(doc: Document, metas: List<DocumentSnapshot>)
+  - agregarSeccionTransacciones(doc: Document, transacciones: List<DocumentSnapshot>)
+  - agregarPiePagina(doc: Document)
+  - enviarPorCorreo(context: Context, file: File, user: User)
+  - formatDate(timestamp: Long): String
+  - formatDateComplete(timestamp: Long): String
+  - formatDateForFile(timestamp: Long): String
+  - formatCurrency(amount: Double): String
+  - bitmapToByteArray(bitmap: Bitmap): ByteArray
+}
+
+class UserDataProvider {
+  + generarResumenFinanciero()
+}
+
+
+
+
+
+
+class ChatScreen {
+  + ChatScreen(
+      chatViewModel: ChatViewModel,
+      authViewModel: AuthViewModel,
+      transactionViewModel: TransactionViewModel,
+      metaViewModel: MetaViewModel,
+      navController: NavHostController
+    )
+
+  + mostrarHistorialConversacion()
+  + enviarPreguntaConContexto()
+  + generarResumenFinanciero()
+  + mostrarCampoEntrada()
+  + mostrarBotonEnviar()
+  + mostrarDrawer()
+}
+class GestionMetasScreen {
+  + GestionMetasScreen(
+      authViewModel: AuthViewModel,
+      metaViewModel: MetaViewModel,
+      navController: NavHostController
+    )
+
+  + mostrarTabsFiltrados()
+  + cargarMetas()
+  + mostrarMetaCard(meta: Meta, isCompleted: Boolean)
+  + mostrarDrawer()
+  + mostrarEstadoVacio()
+}
+
+class MetaCard {
+  + MetaCard(meta: Meta, isCompleted: Boolean)
+}
+
+GestionMetasScreen --> MetaCard
+
+class HomeScreen {
+  + HomeScreen(
+      nombreUsuario: String,
+      authViewModel: AuthViewModel,
+      transactionViewModel: TransactionViewModel,
+      metaViewModel: MetaViewModel,
+      progresoViewModel: ProgresoViewModel,
+      navController: NavHostController
+    )
+
+  + mostrarBienvenida()
+  + mostrarEstadísticasRápidas()
+  + mostrarGráficoTransacciones()
+  + mostrarMetasEnProceso()
+  + mostrarPopupTransaccion()
+  + cargarDatos()
+}
+
+class WelcomeSection {
+  + WelcomeSection(nombreUsuario: String, balance: Float)
+}
+
+class QuickStatsSection {
+  + QuickStatsSection(totalTransacciones: Int, metasActivas: Int)
+}
+
+class ChartSection {
+  + ChartSection(datosGrafico: List<Any>)
+}
+
+class SectionHeader {
+  + SectionHeader(title: String, subtitle: String?, icon: ImageVector?, textColor: Color)
+}
+
+class GoalCard {
+  + GoalCard(meta: Meta)
+}
+
+HomeScreen --> WelcomeSection
+HomeScreen --> QuickStatsSection
+HomeScreen --> ChartSection
+HomeScreen --> SectionHeader
+HomeScreen --> GoalCard
+
+class LoginScreen {
+  + LoginScreen(authViewModel: AuthViewModel, navController: NavController, metaViewModel: MetaViewModel)
+
+  + mostrarFormularioLogin()
+  + iniciarSesionCorreo()
+  + iniciarSesionGoogle()
+  + mostrarSnackbar()
+  + navegarARegistro()
+  + mostrarPopupRecuperarContraseña()
+  + observarEstadoUsuario()
+  + animarFondo()
+}
+
+class MetasScreen {
+  + MetasScreen(
+      authViewModel: AuthViewModel,
+      metaViewModel: MetaViewModel,
+      transactionViewModel: TransactionViewModel,
+      navController: NavHostController
+    )
+
+  + mostrarListaMetas()
+  + mostrarTopBar()
+  + mostrarPopupNuevaMeta()
+  + marcarMetaComoCompletada()
+  + eliminarMeta()
+  + cargarMetas()
+}
+class MiCuentaScreen {
+  + MiCuentaScreen(authViewModel: AuthViewModel, transactionViewModel: TransactionViewModel, navController: NavController)
+
+  + mostrarFormularioUsuario()
+  + guardarCambiosPerfil()
+  + actualizarDinero()
+  + cambiarContraseña()
+  + generarPdfResumen()
+  + resetearCuenta()
+  + cerrarSesion()
+  + eliminarCuenta()
+}
+package "App Navigation" {
+    class AppNavGraph {
+        + navController: NavHostController
+        + authViewModel: AuthViewModel
+        + transactionViewModel: TransactionViewModel
+    }
+
+    AppNavGraph --> SplashScreen
+    AppNavGraph --> LoginScreen
+    AppNavGraph --> RegisterScreen
+    AppNavGraph --> HomeScreen
+    AppNavGraph --> MiCuentaScreen
+    AppNavGraph --> TransaccionesScreen
+    AppNavGraph --> MetasScreen
+    AppNavGraph --> GestionMetasScreen
+    AppNavGraph --> ChatScreen
+}
+
+package "ViewModels" {
+    class AuthViewModel
+    class TransactionViewModel
+    class MetaViewModel
+    class ProgresoViewModel
+    class ChatViewModel
+
+    MetaViewModel --> MetaRepositoryImpl
+}
+
+SplashScreen --> AuthViewModel
+LoginScreen --> AuthViewModel
+LoginScreen --> MetaViewModel
+RegisterScreen --> AuthViewModel
+HomeScreen --> AuthViewModel
+HomeScreen --> TransactionViewModel
+HomeScreen --> MetaViewModel
+HomeScreen --> ProgresoViewModel
+MiCuentaScreen --> AuthViewModel
+MiCuentaScreen --> TransactionViewModel
+TransaccionesScreen --> AuthViewModel
+TransaccionesScreen --> TransactionViewModel
+MetasScreen --> MetaViewModel
+GestionMetasScreen --> MetaViewModel
+ChatScreen --> ChatViewModel
+ChatScreen --> AuthViewModel
+ChatScreen --> MetaViewModel
+ChatScreen --> TransactionViewModel
+
+class PopupMeta {
+    + userId: String
+    + categorias: List<String>
+    + onDismiss(): Unit
+    + onConfirm(): Unit
+    + viewModel: MetaViewModel
+}
+
+PopupMeta --> MetaViewModel : agregarMeta(meta: Meta)
+
+MetaViewModel --> Meta : crea instancia con:
+Meta : +id : String
+Meta : +userId : String
+Meta : +categoria : String
+Meta : +tipo : String
+Meta : +cantidad : Double
+Meta : +fechaLimite : Long
+Meta : +fechaCreacion : Long
+Meta : +estado : String
+Meta : +progreso : Float
+
+class PopupTransaccion {
+    +userId: String
+    +categorias: List<String>
+    +onDismiss(): Unit
+    +onConfirm(): Unit
+    +viewModel: TransactionViewModel
+    +onUpdateDinero(cantidad: Double, tipo: String): Unit
+    +metaViewModel: MetaViewModel
+    +progresoViewModel: ProgresoViewModel
+}
+
+PopupTransaccion --> TransactionViewModel : agregarTransaccion()
+PopupTransaccion --> TransactionViewModel : agregarCategoria()
+PopupTransaccion --> MetaViewModel : cargarMetas()
+PopupTransaccion --> ProgresoViewModel : calcularYActualizarProgresoMetas()
+
+TransactionViewModel --> Transaction
+Transaction : +id: String
+Transaction : +userId: String
+Transaction : +tipo: String
+Transaction : +fecha: Long
+Transaction : +titulo: String
+Transaction : +cantidad: Double
+Transaction : +descripcion: String
+Transaction : +categoria: String
+
+class RegisterScreen {
+  +nombreCompleto: String
+  +nombreUsuario: String
+  +correo: String
+  +password: String
+  +confirmPassword: String
+  +onClick(): Unit
+}
+
+RegisterScreen --> AuthViewModel : registerUser(...)
+RegisterScreen --> AuthViewModel : setError(...)
+RegisterScreen --> AuthViewModel : clearMessages()
+
+class SplashScreen {
+  -alphaAnim: Float
+  +SplashScreen(navController: NavController, authViewModel: AuthViewModel): Unit
+}
+
+SplashScreen --> AuthViewModel : user (StateFlow)
+SplashScreen --> NavController : navigate(...)
+
+class TransaccionesScreen {
+  + TransaccionesScreen(tipo: String, authViewModel: AuthViewModel, transactionViewModel: TransactionViewModel, navController: NavHostController)
+
+  -- Estados --
+  - drawerState: DrawerState
+  - scope: CoroutineScope
+  - user: User?
+  - userId: String
+  - dineroTotal: Double
+  - transacciones: List<Transaction>
+  - selectedTransaction: Transaction?
+  - showDialog: Boolean
+  - showConfirmDelete: Boolean
+  - expanded: Boolean (por transacción)
+
+  -- Funcionalidades --
+  + cargarTransaccionesPorTipo(userId: String, tipo: String)
+  + eliminarTransaccion(userId: String, transaccion: Transaction, onResult: (Double) -> Unit)
+  + mostrarDetalles(transaccion: Transaction)
+  + mostrarConfirmacionEliminacion(transaccion: Transaction)
+
+
+}
+
+@enduml
