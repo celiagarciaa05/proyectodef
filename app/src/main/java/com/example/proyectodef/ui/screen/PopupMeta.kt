@@ -31,17 +31,15 @@ fun PopupMeta(
     onConfirm: () -> Unit,
     viewModel: MetaViewModel
 ) {
-    // Paleta de colores neon
-    val neonCyan = Color(0xFF00FFFF)          // Celeste neon
-    val neonBlue = Color(0xFF0099FF)          // Azul neon
-    val neonAqua = Color(0xFF00FFCC)          // Verde agua neon
-    val neonPurple = Color(0xFFCC00FF)        // Lila neon
-    val neonPink = Color(0xFFFF0080)          // Rosa neon
-    val neonLightPink = Color(0xFFFF66B3)     // Rosa claro neon
-    val darkBackground = Color(0xFF0A0A0F)    // Fondo oscuro
-    val cardBackground = Color(0xFF1A1A2E)    // Fondo de tarjetas
+    val neonCyan = Color(0xFF00FFFF)
+    val neonBlue = Color(0xFF0099FF)
+    val neonAqua = Color(0xFF00FFCC)
+    val neonPurple = Color(0xFFCC00FF)
+    val neonPink = Color(0xFFFF0080)
+    val neonLightPink = Color(0xFFFF66B3)
+    val darkBackground = Color(0xFF0A0A0F)
+    val cardBackground = Color(0xFF1A1A2E)
 
-    // Estados del formulario
     var categoriaSeleccionada by remember { mutableStateOf(categorias.firstOrNull() ?: "") }
     var tipo by remember { mutableStateOf("Gasto") }
     var cantidad by remember { mutableStateOf("") }
@@ -91,7 +89,7 @@ fun PopupMeta(
                         fechaLimite = fechaDate.time,
                         fechaCreacion = System.currentTimeMillis(),
                         estado = "Proceso",
-                        progreso = 0f // 🔥 ¡Esto es lo que faltaba!
+                        progreso = 0f
                     )
 
 
@@ -177,11 +175,11 @@ fun PopupMeta(
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier
-                    .fillMaxHeight(0.7f) // límite máximo visual del popup
+                    .fillMaxHeight(0.7f)
                     .verticalScroll(scrollState)
                     .padding(vertical = 8.dp)
             ) {
-                // Dropdown para categorías
+
                 Card(
                     colors = CardDefaults.cardColors(
                         containerColor = cardBackground.copy(alpha = 0.7f)
@@ -254,7 +252,7 @@ fun PopupMeta(
                     }
                 }
 
-                // Botones de tipo
+
                 Card(
                     colors = CardDefaults.cardColors(
                         containerColor = cardBackground.copy(alpha = 0.7f)
@@ -337,7 +335,6 @@ fun PopupMeta(
                     }
                 }
 
-                // Descripción de la meta
                 Card(
                     colors = CardDefaults.cardColors(
                         containerColor = neonCyan.copy(alpha = 0.1f)
@@ -365,7 +362,6 @@ fun PopupMeta(
                     )
                 }
 
-                // Campo cantidad
                 OutlinedTextField(
                     value = cantidad,
                     onValueChange = {
@@ -391,7 +387,6 @@ fun PopupMeta(
                     shape = RoundedCornerShape(12.dp)
                 )
 
-                // Campo fecha
                 OutlinedTextField(
                     value = fechaTexto,
                     onValueChange = {
@@ -417,7 +412,8 @@ fun PopupMeta(
                     shape = RoundedCornerShape(12.dp)
                 )
 
-                // Mensaje de error
+
+
                 error?.let {
                     Card(
                         colors = CardDefaults.cardColors(
