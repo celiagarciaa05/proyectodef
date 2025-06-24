@@ -47,13 +47,10 @@ fun GestionMetasScreen(
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-
     val user by authViewModel.user.collectAsState()
     val userId = user?.userId.orEmpty()
-
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("Completadas", "Expiradas")
-
     val metas by metaViewModel.metas.collectAsState()
     val metasFiltradas = when (selectedTab) {
         0 -> metas.filter { it.estado == "Completado" }
@@ -67,17 +64,15 @@ fun GestionMetasScreen(
         }
     }
 
-    // Colores neón vibrantes
     val neonColors = listOf(
-        Color(0xFF00FFFF), // Celeste neón
-        Color(0xFFFFB3E6), // Rosa claro
-        Color(0xFFFF1493), // Rosa fucsia
-        Color(0xFF00BFFF), // Azul neón
-        Color(0xFF00FFCC), // Verde agua
-        Color(0xFFDA70D6)  // Lila
+        Color(0xFF00FFFF),
+        Color(0xFFFFB3E6),
+        Color(0xFFFF1493),
+        Color(0xFF00BFFF),
+        Color(0xFF00FFCC),
+        Color(0xFFDA70D6)
     )
 
-    // Fondo animado con degradado neón
     val infiniteTransition = rememberInfiniteTransition()
     val offset by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -91,9 +86,8 @@ fun GestionMetasScreen(
     val backgroundBrush = Brush.radialGradient(
         colors = neonColors.map { it.copy(alpha = 0.3f) },
         center = Offset(offset * 0.5f, offset * 0.3f),
-        radius = maxOf(offset * 0.8f, 1f) // ← protege contra radius = 0
+        radius = maxOf(offset * 0.8f, 1f)
     )
-
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -114,13 +108,11 @@ fun GestionMetasScreen(
                     )
                 )
         ) {
-            // Fondo animado superpuesto
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(backgroundBrush)
             )
-
             Scaffold(
                 topBar = {
                     TopAppBar(
@@ -176,7 +168,6 @@ fun GestionMetasScreen(
                         .fillMaxSize()
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
-                    // Tabs con diseño neón
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -235,7 +226,6 @@ fun GestionMetasScreen(
                     }
 
                     if (metasFiltradas.isEmpty()) {
-                        // Estado vacío con diseño atractivo
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
@@ -347,7 +337,7 @@ private fun MetaCard(meta: Meta, isCompleted: Boolean) {
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .background(Color.Transparent) // ← transparencia explícita
+                    .background(Color.Transparent)
             ) {
                 Text(
                     text = meta.categoria,
@@ -386,7 +376,6 @@ private fun MetaCard(meta: Meta, isCompleted: Boolean) {
                     Text(fechaFormatted, fontSize = 14.sp, color = Color(0xFFDA70D6))
                 }
             }
-
         }
     }
 }

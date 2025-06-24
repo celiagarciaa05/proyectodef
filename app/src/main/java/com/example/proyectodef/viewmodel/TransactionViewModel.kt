@@ -44,11 +44,8 @@ class TransactionViewModel(private val repo: TransactionRepository) : ViewModel(
         viewModelScope.launch {
             val result = repo.addTransaction(transaction)
             if (result.isSuccess) {
-                // ✅ Refresca todo tras añadir una nueva
                 cargarTransaccionesPorTipo(transaction.userId, transaction.tipo)
                 cargarTransaccionesPorCategoria(transaction.userId)
-            } else {
-                println("Error al agregar transacción: ${result.exceptionOrNull()?.message}")
             }
         }
     }
@@ -79,7 +76,6 @@ class TransactionViewModel(private val repo: TransactionRepository) : ViewModel(
 
                 _transaccionesPorCategoria.value = agrupadas
             } catch (e: Exception) {
-                println("Error al cargar transacciones por categoría: ${e.message}")
                 _transaccionesPorCategoria.value = emptyList()
             }
         }
@@ -88,8 +84,6 @@ class TransactionViewModel(private val repo: TransactionRepository) : ViewModel(
     fun cargarTransaccionesPorTipo(userId: String, tipo: String) {
         viewModelScope.launch {
             try {
-                println("🔄 Cargando transacciones para userId=$userId tipo=$tipo")
-
                 val snapshot = Firebase.firestore
                     .collection("usuarios")
                     .document(userId)
@@ -97,23 +91,17 @@ class TransactionViewModel(private val repo: TransactionRepository) : ViewModel(
                     .get()
                     .await()
 
-                println("📄 Documentos totales: ${snapshot.documents.size}")
-
                 val transacciones = snapshot.documents.mapNotNull {
                     val obj = it.toObject(Transaction::class.java)
-                    println("✅ Doc leído: ${obj?.titulo}, tipo: ${obj?.tipo}")
-                    obj
+                    obj?.copy(id = it.id)
                 }.filter { it.tipo.trim().lowercase() == tipo.trim().lowercase() }
 
-                println("✅ Transacciones filtradas: ${transacciones.size}")
                 _transaccionesFiltradas.value = transacciones
             } catch (e: Exception) {
-                println("❌ Error al cargar transacciones de tipo $tipo: ${e.message}")
                 _transaccionesFiltradas.value = emptyList()
             }
         }
     }
-// Dentro de TransactionViewModel
 
     fun calcularProgresoMeta(userId: String, meta: Meta): Float {
         val transaccionesUsuario = _transaccionesFiltradas.value
@@ -126,7 +114,6 @@ class TransactionViewModel(private val repo: TransactionRepository) : ViewModel(
         val progreso = (totalAcumulado / meta.cantidad * 100).toFloat()
         return progreso.coerceIn(0f, 100f)
     }
-
 
     fun cargarTodasTransacciones(userId: String) {
         viewModelScope.launch {
@@ -144,7 +131,6 @@ class TransactionViewModel(private val repo: TransactionRepository) : ViewModel(
 
                 _todasTransacciones.value = transacciones
             } catch (e: Exception) {
-                println("Error cargando todas transacciones: ${e.message}")
                 _todasTransacciones.value = emptyList()
             }
         }
@@ -162,24 +148,20 @@ class TransactionViewModel(private val repo: TransactionRepository) : ViewModel(
                     .await()
 
                 val cambio = if (transaccion.tipo.trim().equals("Gasto", ignoreCase = true)) {
-                    -transaccion.cantidad // sumar el gasto eliminado
+                    -transaccion.cantidad
                 } else {
-                    transaccion.cantidad // restar el ahorro eliminado
+                    transaccion.cantidad
                 }
                 onDineroActualizado(cambio)
 
                 cargarTransaccionesPorTipo(userId, transaccion.tipo)
                 cargarTransaccionesPorCategoria(userId)
-
-                println("✅ Transacción eliminada: ${transaccion.titulo}")
             } catch (e: Exception) {
-                println("❌ Error al eliminar transacción: ${e.message}")
             }
         }
     }
 }
 
-// Clase auxiliar para el gráfico
 data class CategoriaConTotales(
     val nombre: String,
     val totalAhorros: Double,

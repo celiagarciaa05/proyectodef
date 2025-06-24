@@ -22,7 +22,6 @@ class ProgresoViewModel : ViewModel() {
                 .collection("metas")
 
             for (meta in metas) {
-                Log.d("deiviProgresoViewModel", "Procesando meta ${meta.id} (${meta.categoria})")
                 if (meta.estado != "Completado" && meta.id.isNotBlank() && !meta.id.contains("/")) {
                     try {
                         val transSnap = transRef
@@ -32,10 +31,7 @@ class ProgresoViewModel : ViewModel() {
                             .get()
                             .await()
 
-                        Log.d("deiviProgresoViewModel", "Transacciones encontradas: ${transSnap.size()} para meta ${meta.id}")
-
                         val suma = transSnap.documents.sumOf { it.getDouble("cantidad") ?: 0.0 }
-                        Log.d("deiviProgresoViewModel", "Suma total: $suma / Objetivo: ${meta.cantidad}")
 
                         val progreso = (suma / meta.cantidad).coerceAtMost(1.0)
                         val metaDocRef = metasRef.document(meta.id)
@@ -47,16 +43,11 @@ class ProgresoViewModel : ViewModel() {
                                     "progreso" to 1.0
                                 )
                             ).await()
-                            Log.d("deiviProgresoViewModel", "Meta ${meta.id} marcada como completada.")
                         } else {
                             metaDocRef.update("progreso", progreso).await()
-                            Log.d("deiviProgresoViewModel", "Meta ${meta.id} actualizada con progreso ${(progreso * 100).toInt()}%.")
                         }
-                    } catch (e: Exception) {
-                        Log.e("deiviProgresoViewModel", "Error al actualizar meta ${meta.id}: ${e.message}", e)
+                    } catch (_: Exception) {
                     }
-                } else if (meta.id.isBlank()) {
-                    Log.e("deiviProgresoViewModel", "Meta con ID vacío, no se puede actualizar. Meta: $meta")
                 }
             }
         }

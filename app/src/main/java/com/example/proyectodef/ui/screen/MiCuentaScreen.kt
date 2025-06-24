@@ -48,8 +48,6 @@ fun MiCuentaScreen(
     val correo = user?.correo ?: ""
     var dineroTotalField by remember { mutableStateOf(user?.dineroTotal?.toString() ?: "0.0") }
     var nuevaContraseña by remember { mutableStateOf("") }
-
-    // Colores neón personalizados
     val neonPink = Color(0xFFFF007F)
     val neonPurple = Color(0xFFBF00FF)
     val neonCyan = Color(0xFF00FFFF)
@@ -69,23 +67,22 @@ fun MiCuentaScreen(
             )
         }
     ) {
-        // Fondo con degradado neón espectacular multicolor
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            Color(0xFF1A0033), // Púrpura muy oscuro
-                            Color(0xFF330066), // Púrpura medio
-                            Color(0xFF4D0080), // Púrpura vibrante
-                            Color(0xFF0066CC), // Azul neón
-                            Color(0xFF003D66)  // Azul oscuro
+                            Color(0xFF1A0033),
+                            Color(0xFF330066),
+                            Color(0xFF4D0080),
+                            Color(0xFF0066CC),
+                            Color(0xFF003D66)
+
                         )
                     )
                 )
         ) {
-            // Capa adicional con gradiente diagonal para más color
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -147,7 +144,6 @@ fun MiCuentaScreen(
                             .padding(20.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        // Campos de texto con estilo neón - Colores básicos
                         val neonTextFieldColors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = neonCyan,
                             unfocusedBorderColor = neonLilac.copy(alpha = 0.6f),
@@ -158,8 +154,6 @@ fun MiCuentaScreen(
                             unfocusedTextColor = neonLilac.copy(alpha = 0.9f),
 
                             )
-
-                        // Colores especiales para correo (readonly)
                         val correoTextFieldColors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = neonAqua,
                             unfocusedBorderColor = neonAqua.copy(alpha = 0.5f),
@@ -170,8 +164,6 @@ fun MiCuentaScreen(
                             unfocusedTextColor = neonLilac.copy(alpha = 0.9f),
 
                             )
-
-                        // Colores especiales para dinero
                         val dineroTextFieldColors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = neonAqua,
                             unfocusedBorderColor = neonAqua.copy(alpha = 0.6f),
@@ -182,8 +174,6 @@ fun MiCuentaScreen(
                             unfocusedTextColor = neonLilac.copy(alpha = 0.9f),
 
                             )
-
-                        // Colores especiales para contraseña
                         val passwordTextFieldColors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = neonPink,
                             unfocusedBorderColor = neonPink.copy(alpha = 0.6f),
@@ -268,8 +258,6 @@ fun MiCuentaScreen(
                                 }
                             }
                         }
-
-                        // Divisor neón
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -336,8 +324,6 @@ fun MiCuentaScreen(
                                 }
                             }
                         }
-
-                        // Divisor neón
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -468,7 +454,7 @@ fun MiCuentaScreen(
                             }
                         }
 
-                        // Divisor neón
+
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -492,12 +478,19 @@ fun MiCuentaScreen(
                                     scope.launch {
                                         db.collection("usuarios").document(it.userId)
                                             .update("dineroTotal", 0).await()
+
                                         db.collection("usuarios").document(it.userId)
                                             .collection("categorias").get()
                                             .await().documents.forEach { doc -> doc.reference.delete() }
+
                                         db.collection("usuarios").document(it.userId)
                                             .collection("transacciones").get()
                                             .await().documents.forEach { doc -> doc.reference.delete() }
+
+                                        db.collection("usuarios").document(it.userId)
+                                            .collection("metas").get()
+                                            .await().documents.forEach { doc -> doc.reference.delete() }
+
                                         authViewModel.updateDinero(0.0)
                                         transactionViewModel.cargarCategorias(it.userId)
 
@@ -520,8 +513,8 @@ fun MiCuentaScreen(
                                     .background(
                                         brush = Brush.horizontalGradient(
                                             colors = listOf(
-                                                Color(0xFFFF6B35), // Naranja neón
-                                                Color(0xFFFF3D71), // Rosa neón intenso
+                                                Color(0xFFFF6B35),
+                                                Color(0xFFFF3D71),
                                                 neonPink
                                             )
                                         ),
@@ -563,7 +556,7 @@ fun MiCuentaScreen(
                                     .background(
                                         brush = Brush.horizontalGradient(
                                             colors = listOf(
-                                                Color(0xFF7C4DFF), // Púrpura vibrante
+                                                Color(0xFF7C4DFF),
                                                 neonPurple,
                                                 neonLilac
                                             )
@@ -612,9 +605,9 @@ fun MiCuentaScreen(
                                     .background(
                                         brush = Brush.horizontalGradient(
                                             colors = listOf(
-                                                Color(0xFFFF1744), // Rojo intenso
-                                                Color(0xFFE91E63), // Rosa fuerte
-                                                Color(0xFFFF4081)  // Rosa vibrante
+                                                Color(0xFFFF1744),
+                                                Color(0xFFE91E63),
+                                                Color(0xFFFF4081)
                                             )
                                         ),
                                         shape = RoundedCornerShape(16.dp)

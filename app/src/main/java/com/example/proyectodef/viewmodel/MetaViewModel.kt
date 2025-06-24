@@ -72,17 +72,13 @@ class MetaViewModel(private val repo: MetaRepository) : ViewModel() {
                             "estado" to "Completado",
                             "progreso" to 1.0
                         )).await()
-                        Log.d("garcia", "Meta ${meta.id} completada y actualizada.")
                     } else {
                         metaDocRef.update("progreso", progreso).await()
-                        Log.d("garcia", "Progreso actualizado (${(progreso * 100).toInt()}%) para meta ${meta.id}.")
                     }
 
-                } catch (e: Exception) {
-                    Log.e("garcia-crash", "Error al procesar meta ${meta.id}: ${e.message}", e)
+                } catch (_: Exception) {
+                    // Manejo de errores omitido
                 }
-            } else if (meta.id.isBlank()) {
-                Log.e("garcia-crash", "ID de meta vacío, no se puede actualizar")
             }
         }
     }
@@ -94,7 +90,6 @@ class MetaViewModel(private val repo: MetaRepository) : ViewModel() {
             .collection("metas")
             .addSnapshotListener { snapshot, e ->
                 if (e != null) {
-                    Log.e("deiviMetaViewModel", "Error escuchando cambios en metas: ${e.message}")
                     return@addSnapshotListener
                 }
 
@@ -114,7 +109,6 @@ class MetaViewModel(private val repo: MetaRepository) : ViewModel() {
                         )
                     }
                     _metas.value = metasActualizadas
-                    Log.d("deiviMetaViewModel", "Metas actualizadas en tiempo real: ${metasActualizadas.size}")
                 }
             }
     }

@@ -50,7 +50,6 @@ fun MetasScreen(
 
     LaunchedEffect(userId) {
         if (userId.isNotBlank()) {
-            Log.d("deiviMetasScreen", "Cargando metas para usuario $userId")
             metaViewModel.cargarMetas(userId)
         }
     }
@@ -123,7 +122,6 @@ fun MetasScreen(
                         FloatingActionButton(
                             onClick = {
                                 showPopup = true
-                                Log.d("deiviMetasScreen", "Click en botón Añadir Meta")
                             },
                             containerColor = Color(0xFFFF0080),
                             contentColor = Color.White,
@@ -152,12 +150,6 @@ fun MetasScreen(
                             .fillMaxSize()
                             .padding(16.dp)
                     ) {
-                        if (metasEnProceso.isEmpty()) {
-                            Log.d("deiviMetasScreen", "No hay metas en proceso")
-                        } else {
-                            Log.d("deiviMetasScreen", "Metas en proceso cargadas: ${metasEnProceso.size}")
-                        }
-
                         LazyColumn(
                             verticalArrangement = Arrangement.spacedBy(16.dp),
                             modifier = Modifier.fillMaxSize()
@@ -196,17 +188,15 @@ fun MetasScreen(
                                                 onDismissRequest = { expandedMenu = false }
                                             ) {
                                                 DropdownMenuItem(
-                                                    text = { Text("✅ Marcar como completada", color = Color(0xFF00FFCC)) },
+                                                    text = { Text("Marcar como completada", color = Color(0xFF00FFCC)) },
                                                     onClick = {
-                                                        Log.d("deiviMetasScreen", "Marcando meta como completada: ${meta.id}")
                                                         metaViewModel.marcarMetaComoCompletada(userId, meta.id)
                                                         expandedMenu = false
                                                     }
                                                 )
                                                 DropdownMenuItem(
-                                                    text = { Text("🗑️ Eliminar", color = Color(0xFFFF0080)) },
+                                                    text = { Text(" Eliminar", color = Color(0xFFFF0080)) },
                                                     onClick = {
-                                                        Log.d("deiviMetasScreen", "Eliminando meta: ${meta.id}")
                                                         metaViewModel.eliminarMeta(userId, meta.id)
                                                         expandedMenu = false
                                                     }
@@ -219,13 +209,11 @@ fun MetasScreen(
                         }
 
                         if (showPopup && userId.isNotBlank()) {
-                            Log.d("deiviMetasScreen", "Mostrando popup para nueva meta")
                             PopupMeta(
                                 userId = userId,
                                 categorias = categorias,
                                 onDismiss = { showPopup = false },
                                 onConfirm = {
-                                    Log.d("deiviMetasScreen", "Meta añadida desde popup")
                                     showPopup = false
                                 },
                                 viewModel = metaViewModel

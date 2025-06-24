@@ -11,79 +11,55 @@ import org.json.JSONObject
 
 object ChatService {
 
-    private const val API_URL = "https://api.openai.com/v1/chat/completions"
-    private const val API_KEY = "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"
-    private const val ORG_ID = "org-nLl0BjsxMmcGZ3XaxL5em6af"
+    private const val API_URL = "https://api.together.xyz/v1/chat/completions"
+    private const val API_KEY = "tgp_v1_UXDxmYWanILe3eLEQ-HYejl9jgF_75ZHjea-fjwZrWs"
+    private const val MODEL = "meta-llama/Meta-Llama-3-8B-Instruct-Lite"
 
-    private val client = OkHttpClient.Builder()
-        .callTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
-        .connectTimeout(20, java.util.concurrent.TimeUnit.SECONDS)
-        .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
-        .writeTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
-        .build()
+    private val SYSTEM_PROMPT = """
+    Eres Buddy, un asistente financiero. Ya tienes el contexto completo del usuario (datos, transacciones, metas, etc.). 
+    Debes contestar únicamente a lo que pida o diga el usuario, no a más nada, siempre y cuando el tema no se salga de las finanzas. 
+    No uses carácteres especiales, ni repitas los mensajes. Sé útil, y amigable, habla de tú a tú. Respone en solo un parráfo no muy largo.
+    """.trimIndent()
 
-    suspend fun enviarPrompt(
-        messages: List<Pair<String, String>>,
-        userContext: String
-    ): String = withContext(Dispatchers.IO) {
+    private val client = OkHttpClient.Builder().callTimeout(30, java.util.concurrent.TimeUnit.SECONDS).connectTimeout(20, java.util.concurrent.TimeUnit.SECONDS).readTimeout(30, java.util.concurrent.TimeUnit.SECONDS).writeTimeout(30, java.util.concurrent.TimeUnit.SECONDS).build()
+
+    suspend fun enviarPrompt(messages: List<Pair<String, String>>, userContext: String = ""): String = withContext(Dispatchers.IO) {
         try {
-            println("GUAPA: 🔧 Preparando mensaje para OpenAI...")
-
             val mensajesArray = JSONArray()
-
-            // Mensaje system
-            val systemMessage = """
-    Eres Budget Buddy, un asistente financiero. Ya tienes el contexto completo del usuario (datos, transacciones, metas, etc.). 
-    Siempre responde desde la primera interacción. No pidas más contexto. Si el usuario escribe cualquier mensaje, debes interpretar la intención y actuar con precisión. 
-    No uses emojis, ni saludos, ni repitas. Sé útil, claro y directo.
-""".trimIndent()
-
-
-            mensajesArray.put(JSONObject().put("role", "system").put("content", systemMessage))
-
-            // ✅ Incluir siempre el contexto si está disponible
+            mensajesArray.put(JSONObject().put("role", "system").put("content", SYSTEM_PROMPT))
             if (userContext.isNotBlank()) {
-                mensajesArray.put(JSONObject().put("role", "user").put("content", "📊 Contexto financiero del usuario:\n$userContext"))
-                println("GUAPA: ✅ Contexto añadido al mensaje")
+                mensajesArray.put(JSONObject().put("role", "user").put("content", "Contexto adicional:\n$userContext"))
             }
 
-            // Conversación previa
             messages.takeLast(6).forEachIndexed { i, (user, bot) ->
                 mensajesArray.put(JSONObject().put("role", "user").put("content", user))
                 mensajesArray.put(JSONObject().put("role", "assistant").put("content", bot))
-                println("GUAPA: 🗣️ Historial [$i] user: $user\nbot: $bot")
             }
 
-            // Crear cuerpo JSON
             val requestJson = JSONObject().apply {
-                put("model", "gpt-4o-mini")
+                put("model", MODEL)
                 put("messages", mensajesArray)
+                put("temperature", 0.7)
+                put("top_p", 0.7)
+                put("top_k", 50)
+                put("repetition_penalty", 1.0)
+                put("stream", false)
             }
 
             val requestBody = requestJson.toString().toRequestBody("application/json".toMediaType())
-            val request = Request.Builder()
-                .url(API_URL)
-                .addHeader("Authorization", "Bearer $API_KEY")
-                .addHeader("Content-Type", "application/json")
-                .addHeader("OpenAI-Organization", ORG_ID)
-                .post(requestBody)
-                .build()
-
-            println("GUAPA: 🚀 Enviando solicitud a OpenAI...")
+            val request = Request.Builder().url(API_URL).addHeader("Authorization", "Bearer $API_KEY").addHeader("Content-Type", "application/json").post(requestBody).build()
             val response = client.newCall(request).execute()
             val responseBody = response.body?.string().orEmpty()
-            println("GUAPA: ✅ Respuesta HTTP ${response.code}\n$responseBody")
+            val jsonResponse = JSONObject(responseBody)
+            if (jsonResponse.has("error")) {
+                val errorMsg = jsonResponse.getJSONObject("error").optString("message", "Error desconocido")
+                return@withContext "TogetherAI dio error: $errorMsg"
+            }
 
-            return@withContext JSONObject(responseBody)
-                .optJSONArray("choices")
-                ?.optJSONObject(0)
-                ?.optJSONObject("message")
-                ?.optString("content")
-                ?.trim()
-                ?: "No se encontró contenido válido en la respuesta."
+            return@withContext jsonResponse.optJSONArray("choices")?.optJSONObject(0)?.optJSONObject("message")?.optString("content")?.trim() ?: "No se encontró contenido válido en la respuesta."
 
         } catch (e: Exception) {
-            println("GUAPA: ❌ Error en enviarPrompt: ${e.message}")
+            e.printStackTrace()
             return@withContext "Ocurrió un error al enviar tu mensaje: ${e.message}"
         }
     }

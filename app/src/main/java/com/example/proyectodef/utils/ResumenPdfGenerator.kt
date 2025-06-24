@@ -29,11 +29,10 @@ import java.util.Locale
 
 object ResumenPdfGenerator {
 
-    // Colores corporativos
-    private val COLOR_PRIMARIO = DeviceRgb(41, 128, 185)  // Azul profesional
-    private val COLOR_SECUNDARIO = DeviceRgb(52, 73, 94)  // Gris oscuro
-    private val COLOR_EXITO = DeviceRgb(39, 174, 96)      // Verde
-    private val COLOR_ERROR = DeviceRgb(231, 76, 60)      // Rojo
+    private val COLOR_PRIMARIO = DeviceRgb(41, 128, 185)
+    private val COLOR_SECUNDARIO = DeviceRgb(52, 73, 94)
+    private val COLOR_EXITO = DeviceRgb(39, 174, 96)
+    private val COLOR_ERROR = DeviceRgb(231, 76, 60)
     private val COLOR_GRIS_CLARO = DeviceRgb(236, 240, 241)
 
     suspend fun generarYEnviar(
@@ -56,10 +55,8 @@ object ResumenPdfGenerator {
         val pdfDoc = PdfDocument(PdfWriter(file))
         val doc = Document(pdfDoc)
 
-        // Configurar márgenes
         doc.setMargins(50f, 50f, 50f, 50f)
 
-        // Generar contenido del PDF
         agregarEncabezado(doc, ahora)
         agregarInformacionUsuario(doc, user)
         agregarResumenEjecutivo(doc, transacciones, user.dineroTotal)
@@ -73,7 +70,6 @@ object ResumenPdfGenerator {
     }
 
     private fun agregarEncabezado(doc: Document, fechaGeneracion: Long) {
-        // Título principal
         val titulo = Paragraph("REPORTE FINANCIERO MENSUAL")
             .setTextAlignment(TextAlignment.CENTER)
             .setFontSize(24f)
@@ -81,16 +77,12 @@ object ResumenPdfGenerator {
             .setFontColor(COLOR_PRIMARIO)
             .setMarginBottom(10f)
         doc.add(titulo)
-
-        // Línea separadora
         val lineaSeparadora = Table(1)
             .useAllAvailableWidth()
             .setBorder(SolidBorder(COLOR_PRIMARIO, 2f))
         .setMarginBottom(20f)
         lineaSeparadora.addCell(Cell().setBorder(null).setHeight(5f))
         doc.add(lineaSeparadora)
-
-        // Fecha de generación
         val fechaInfo = Paragraph("Generado el: ${formatDateComplete(fechaGeneracion)}")
             .setTextAlignment(TextAlignment.RIGHT)
             .setFontSize(10f)
@@ -110,15 +102,11 @@ object ResumenPdfGenerator {
         val tablaUsuario = Table(UnitValue.createPercentArray(floatArrayOf(1f, 2f)))
             .useAllAvailableWidth()
             .setMarginBottom(20f)
-
-        // Estilo para las celdas de encabezado
         val estiloEncabezado = { texto: String ->
             Cell().add(Paragraph(texto).setBold().setFontColor(ColorConstants.WHITE))
                 .setBackgroundColor(COLOR_PRIMARIO)
                 .setPadding(8f)
         }
-
-        // Estilo para las celdas de datos
         val estiloDato = { texto: String ->
             Cell().add(Paragraph(texto))
                 .setPadding(8f)
@@ -151,7 +139,6 @@ object ResumenPdfGenerator {
             .setMarginBottom(10f)
         doc.add(tituloSeccion)
 
-        // Calcular métricas
         var totalIngresos = 0.0
         var totalGastos = 0.0
         var transaccionesIngresos = 0
@@ -173,13 +160,10 @@ object ResumenPdfGenerator {
         val balanceNeto = totalIngresos - totalGastos
         val promedioGastos = if (transaccionesGastos > 0) totalGastos / transaccionesGastos else 0.0
         val promedioIngresos = if (transaccionesIngresos > 0) totalIngresos / transaccionesIngresos else 0.0
-
-        // Tabla de resumen
         val tablaResumen = Table(UnitValue.createPercentArray(floatArrayOf(2f, 1f, 1f)))
             .useAllAvailableWidth()
             .setMarginBottom(20f)
 
-        // Encabezados
         tablaResumen.addHeaderCell(
             Cell().add(Paragraph("CONCEPTO").setBold().setFontColor(ColorConstants.WHITE))
                 .setBackgroundColor(COLOR_PRIMARIO)
@@ -199,7 +183,6 @@ object ResumenPdfGenerator {
                 .setTextAlignment(TextAlignment.CENTER)
         )
 
-        // Datos de ingresos
         tablaResumen.addCell(
             Cell().add(Paragraph("Total Ingresos").setFontColor(COLOR_EXITO).setBold())
                 .setPadding(8f)
@@ -215,7 +198,6 @@ object ResumenPdfGenerator {
                 .setTextAlignment(TextAlignment.RIGHT)
         )
 
-        // Datos de gastos
         tablaResumen.addCell(
             Cell().add(Paragraph("Total Gastos").setFontColor(COLOR_ERROR).setBold())
                 .setPadding(8f)
@@ -231,7 +213,6 @@ object ResumenPdfGenerator {
                 .setTextAlignment(TextAlignment.RIGHT)
         )
 
-        // Balance neto
         val colorBalance = if (balanceNeto >= 0) COLOR_EXITO else COLOR_ERROR
         tablaResumen.addCell(
             Cell().add(Paragraph("Balance Neto").setBold())
@@ -273,7 +254,6 @@ object ResumenPdfGenerator {
                 .useAllAvailableWidth()
                 .setMarginBottom(20f)
 
-            // Encabezados
             val encabezados = listOf("CATEGORÍA", "TIPO", "OBJETIVO", "ESTADO", "FECHA LÍMITE")
             encabezados.forEach { encabezado ->
                 tablaMetas.addHeaderCell(
@@ -284,7 +264,6 @@ object ResumenPdfGenerator {
                 )
             }
 
-            // Datos de metas
             metas.forEachIndexed { index, meta ->
                 val esPar = index % 2 == 0
                 val colorFondo = if (esPar) ColorConstants.WHITE else COLOR_GRIS_CLARO
@@ -333,7 +312,6 @@ object ResumenPdfGenerator {
             .useAllAvailableWidth()
             .setMarginBottom(20f)
 
-        // Encabezados
         val encabezados = listOf("FECHA", "DESCRIPCIÓN", "TIPO", "CANTIDAD")
         encabezados.forEach { encabezado ->
             tablaTransacciones.addHeaderCell(
@@ -344,12 +322,10 @@ object ResumenPdfGenerator {
             )
         }
 
-        // Ordenar transacciones por fecha (más recientes primero)
         val transaccionesOrdenadas = transacciones.sortedByDescending {
             it.getLong("fecha") ?: 0L
         }
 
-        // Datos de transacciones
         transaccionesOrdenadas.forEachIndexed { index, transaccion ->
             val esPar = index % 2 == 0
             val colorFondo = if (esPar) ColorConstants.WHITE else COLOR_GRIS_CLARO
@@ -372,7 +348,7 @@ object ResumenPdfGenerator {
     }
 
     private fun agregarPiePagina(doc: Document) {
-        // Línea separadora
+
         val lineaSeparadora = Table(1)
             .useAllAvailableWidth()
             .setBorder(SolidBorder(COLOR_PRIMARIO, 1f))
@@ -381,7 +357,6 @@ object ResumenPdfGenerator {
         lineaSeparadora.addCell(Cell().setBorder(null).setHeight(2f))
         doc.add(lineaSeparadora)
 
-        // Información del pie
         val piePagina = Paragraph("Este reporte fue generado automáticamente por la aplicación de gestión financiera personal.")
             .setTextAlignment(TextAlignment.CENTER)
             .setFontSize(10f)
@@ -430,7 +405,6 @@ object ResumenPdfGenerator {
         context.startActivity(Intent.createChooser(emailIntent, "Enviar reporte financiero"))
     }
 
-    // Funciones auxiliares de formato
     private fun formatDate(timestamp: Long): String {
         val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         return sdf.format(Date(timestamp))
@@ -447,7 +421,7 @@ object ResumenPdfGenerator {
     }
 
     private fun formatCurrency(amount: Double): String {
-        val formatter = NumberFormat.getCurrencyInstance(Locale("es", "MX"))
+        val formatter = NumberFormat.getCurrencyInstance(Locale("es", "ES"))
         return formatter.format(amount)
     }
 

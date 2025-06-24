@@ -60,7 +60,7 @@ fun RegisterScreen(authViewModel: AuthViewModel, navController: NavController) {
     }
 
     val nombreCompletoRegex = Regex("^[A-Za-zÁÉÍÓÚáéíóúÑñÜü ]+\$")
-    val nombreUsuarioRegex = Regex("^[A-Za-z0-9]{3,}\$") // letras y números, min 3 caracteres
+    val nombreUsuarioRegex = Regex("^[A-Za-z0-9]{3,}\$")
 
     val infiniteTransition = rememberInfiniteTransition()
     val animatedOffset by infiniteTransition.animateFloat(

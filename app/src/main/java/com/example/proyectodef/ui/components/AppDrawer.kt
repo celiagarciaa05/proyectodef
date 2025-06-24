@@ -4,7 +4,9 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.AttachMoney
@@ -53,8 +55,7 @@ fun AppDrawer(
         DrawerItem("Historial de Ahorros", Icons.Default.AttachMoney, "transacciones/Ahorro"),
         DrawerItem("Asistente Virtual", Icons.Default.Message, "chatbot")
     )
-
-    // Animación de fondo más suave
+    val scrollState = rememberScrollState()
     val infiniteTransition = rememberInfiniteTransition()
     val offset by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -79,21 +80,13 @@ fun AppDrawer(
         drawerState = drawerState,
         drawerContent = {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(brush = backgroundBrush)
+                modifier = Modifier.fillMaxSize().background(brush = backgroundBrush)
             ) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = 60.dp, start = 20.dp, end = 20.dp, bottom = 20.dp)
+                    modifier = Modifier.fillMaxSize().verticalScroll(scrollState).padding(top = 60.dp, start = 20.dp, end = 20.dp, bottom = 20.dp)
                 ) {
-                    // Header del drawer
-                    // Header del drawer (versión más compacta)
                     Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 24.dp), // reducido
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
                         colors = CardDefaults.cardColors(
                             containerColor = Color.White.copy(alpha = 0.15f)
                         ),
@@ -102,20 +95,20 @@ fun AppDrawer(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp), // antes era 24.dp
+                                .padding(16.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Icon(
                                 imageVector = Icons.Default.AttachMoney,
                                 contentDescription = null,
                                 tint = Color.White,
-                                modifier = Modifier.size(36.dp) // antes 48.dp
+                                modifier = Modifier.size(36.dp)
                             )
-                            Spacer(modifier = Modifier.height(8.dp)) // antes 12.dp
+                            Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = "Mi Finanzas",
                                 color = Color.White,
-                                fontSize = 18.sp, // antes 22.sp
+                                fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
@@ -126,8 +119,6 @@ fun AppDrawer(
                         }
                     }
 
-
-                    // Lista de opciones
                     opciones.forEach { item ->
                         DrawerMenuItem(
                             item = item,
@@ -148,7 +139,6 @@ fun AppDrawer(
         },
         scrimColor = Color.Black.copy(alpha = 0.5f)
     ) {
-        // Contenido principal de la pantalla
     }
 }
 

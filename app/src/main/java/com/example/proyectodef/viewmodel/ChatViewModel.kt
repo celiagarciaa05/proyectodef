@@ -18,14 +18,15 @@ class ChatViewModel : ViewModel() {
         private set
 
     fun enviarPregunta(pregunta: String, contexto: String = "", onRespuesta: (String) -> Unit) {
-        println("GUAPA: enviarPregunta() con: \"$pregunta\"")
         chatHistory = chatHistory + (pregunta to "...")
         viewModelScope.launch {
             cargando = true
-            val history = chatHistory.drop(1).dropLast(1) // Excluye el primer mensaje y el temporal
-            val respuesta = ChatService.enviarPrompt(history, contexto).ifBlank {
+
+            val fullHistory = chatHistory.drop(1)
+            val respuesta = ChatService.enviarPrompt(fullHistory, contexto).ifBlank {
                 "Lo siento, no pude responder. ¿Podrías reformular tu pregunta?"
             }
+
             chatHistory = chatHistory.dropLast(1) + (pregunta to respuesta)
             cargando = false
             onRespuesta(respuesta)
@@ -34,7 +35,6 @@ class ChatViewModel : ViewModel() {
 
     fun enviarPreguntaConContextoTotal(pregunta: String, userId: String, onRespuesta: (String) -> Unit) {
         cargando = true
-        println("GUAPA: enviarPreguntaConContextoTotal() con: \"$pregunta\"")
         val db = FirebaseFirestore.getInstance()
         val userDocRef = db.collection("usuarios").document(userId)
 
@@ -53,13 +53,11 @@ class ChatViewModel : ViewModel() {
                             transSnap.documents,
                             catSnap.documents
                         )
-                        println("GUAPA: Contexto construido:\n$contexto")
                         enviarPregunta(pregunta, contexto, onRespuesta)
                     }
                 }
             }
         }.addOnFailureListener {
-            println("GUAPA: ❌ Error al obtener datos: ${it.message}")
             enviarPregunta(pregunta, "", onRespuesta)
         }
     }

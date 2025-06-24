@@ -10,11 +10,9 @@ interface AuthRepository {
     suspend fun registerUser(nombreCompleto: String, nombreUsuario: String, correo: String, password: String): Result<User>
     suspend fun actualizarDineroUsuario(userId: String, nuevoDinero: Double)
     suspend fun getUserFromFirestore(userId: String): User?
-    // AuthRepository
     suspend fun actualizarCampoUsuario(userId: String, campo: String, valor: Any)
     suspend fun resetearCuentaUsuario(userId: String)
     suspend fun eliminarCuentaFirebase(userId: String)
-
     fun signOut()
 }
 

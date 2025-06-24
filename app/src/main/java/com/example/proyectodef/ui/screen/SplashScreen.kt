@@ -17,6 +17,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.proyectodef.R
+import com.example.proyectodef.utils.CargaMasivaFirestore
 import com.example.proyectodef.viewmodel.AuthViewModel
 import kotlinx.coroutines.delay
 
@@ -31,18 +32,15 @@ fun SplashScreen(navController: NavController, authViewModel: AuthViewModel) {
     val user by authViewModel.user.collectAsState()
 
     LaunchedEffect(user) {
-        Log.d("Celia", "Celia dice: Estado inicial del usuario en splash: $user")
         alphaAnim = 1f
 
         val startTime = System.currentTimeMillis()
         while (user == null && System.currentTimeMillis() - startTime < 5000) {
-            Log.d("Celia", "Celia dice: Esperando a que user no sea null...")
             delay(100)
         }
 
-        delay(3000) // Para ver logs antes de navegación
+        delay(3000)
 
-        Log.d("Celia", "Celia dice: Navegando a: ${if (user != null) "home" else "login"}")
         navController.navigate(if (user != null) "home" else "login") {
             popUpTo("splash") { inclusive = true }
             launchSingleTop = true
@@ -59,7 +57,7 @@ fun SplashScreen(navController: NavController, authViewModel: AuthViewModel) {
                         Color(0xFFAF1978),
                         Color(0xFFBB86FC),
                         Color(0xFF5FFFFF),
-                        Color(0xFF121212)
+                        Color(0xFF1837ff)
                     ),
                     start = Offset(0f, 0f),
                     end = Offset(1000f, 1500f)

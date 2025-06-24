@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.proyectodef.model.Meta
 import com.example.proyectodef.ui.components.AppDrawer
+import com.example.proyectodef.utils.CargaMasivaFirestore
 import com.example.proyectodef.viewmodel.AuthViewModel
 import com.example.proyectodef.viewmodel.CategoriaConTotales
 import com.example.proyectodef.viewmodel.MetaViewModel
@@ -57,10 +58,13 @@ fun HomeScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var showDialog by remember { mutableStateOf(false) }
-
-    // Estados y datos
     val firebaseUserId = Firebase.auth.currentUser?.uid.orEmpty()
     val user by authViewModel.user.collectAsState()
+   // LaunchedEffect(user) {
+      //  user?.let {
+           // CargaMasivaFirestore.insertarDatos(it.userId)
+        //}
+   // }
     val userId = user?.userId ?: firebaseUserId
     val dineroTotal = user?.dineroTotal ?: 0.0
 
@@ -69,15 +73,11 @@ fun HomeScreen(
     val transacciones by transactionViewModel.transaccionesPorCategoria.collectAsState()
     val metas by metaViewModel.metas.collectAsState()
     val metasAhorroEnProceso = metas.filter { it.estado == "Proceso" && it.tipo == "Ahorro" }
-
-    // Animaciones
     val balanceAnimation by animateFloatAsState(
         targetValue = dineroTotal.toFloat(),
         animationSpec = tween(durationMillis = 1500, easing = FastOutSlowInEasing),
         label = "balance"
     )
-
-    // Efectos
     LaunchedEffect(userId, transacciones) {
         if (userId.isNotBlank()) {
             transactionViewModel.cargarCategorias(userId)
@@ -167,7 +167,6 @@ fun HomeScreen(
                     verticalArrangement = Arrangement.spacedBy(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Sección de bienvenida y balance
                     item {
                         AnimatedVisibility(
                             visible = true,
@@ -183,8 +182,6 @@ fun HomeScreen(
                             )
                         }
                     }
-
-                    // Estadísticas rápidas
                     item {
                         AnimatedVisibility(
                             visible = true,
@@ -200,7 +197,6 @@ fun HomeScreen(
                         }
                     }
 
-                    // Gráfico
                     item {
                         AnimatedVisibility(
                             visible = datosGrafico.isNotEmpty(),
@@ -216,7 +212,6 @@ fun HomeScreen(
                         }
                     }
 
-                    // Metas en proceso
                     if (metasAhorroEnProceso.isNotEmpty()) {
                         item {
                             AnimatedVisibility(
@@ -247,12 +242,10 @@ fun HomeScreen(
                         }
                     }
 
-                    // Espacio final
                     item { Spacer(modifier = Modifier.height(80.dp)) }
                 }
 
-                // Dialog de transacciones
-                if (showDialog && userId.isNotBlank() && categorias.isNotEmpty()) {
+                if (showDialog && userId.isNotBlank()) {
                     PopupTransaccion(
                         userId = userId,
                         categorias = categorias,
@@ -269,11 +262,11 @@ fun HomeScreen(
                             transactionViewModel.cargarTransaccionesPorCategoria(userId)
                             transactionViewModel.cargarTodasTransacciones(userId)
                         },
-                        metaViewModel = metaViewModel, // ✅
-                        progresoViewModel = progresoViewModel // ✅
+                        metaViewModel = metaViewModel,
+                        progresoViewModel = progresoViewModel
                     )
-
                 }
+
             }
         }
     }
@@ -485,7 +478,7 @@ private fun ChartSection(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Contenedor con scroll horizontal para el gráfico
+
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -500,13 +493,12 @@ private fun ChartSection(
                             datos = datosGrafico as List<CategoriaConTotales>,
                             modifier = Modifier
                                 .width(maxOf(300.dp, 80.dp * datosGrafico.size
-                                )) // Ancho dinámico
+                                ))
                                 .height(280.dp)
                         )
                     }
                 }
 
-                // Indicador de scroll
                 if (datosGrafico.size > 4) {
                     Text(
                         text = "← Desliza para ver más →",
@@ -613,12 +605,13 @@ private fun GoalCard(meta: Meta) {
                             )
                         )
                         Text(
-                            text = "${meta.cantidad} €",
+                            text = String.format("%.2f €", meta.cantidad),
                             style = MaterialTheme.typography.bodyLarge.copy(
                                 color = Color.White,
                                 fontWeight = FontWeight.Medium
                             )
                         )
+
                     }
 
                     Box(

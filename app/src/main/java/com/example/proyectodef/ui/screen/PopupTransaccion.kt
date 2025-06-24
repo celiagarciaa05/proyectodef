@@ -3,7 +3,9 @@ package com.example.proyectodef.ui.screen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,23 +31,21 @@ fun PopupTransaccion(
     onConfirm: () -> Unit,
     viewModel: TransactionViewModel,
     onUpdateDinero: (Double, String) -> Unit,
-    metaViewModel: MetaViewModel, // ✅
-    progresoViewModel: ProgresoViewModel // ✅
+    metaViewModel: MetaViewModel,
+    progresoViewModel: ProgresoViewModel
 )
 
 {
-    // Paleta de colores neon
-    val neonCyan = Color(0xFF00FFFF)          // Celeste neon
-    val neonBlue = Color(0xFF0099FF)          // Azul neon
-    val neonAqua = Color(0xFF00FFCC)          // Verde agua neon
-    val neonPurple = Color(0xFFCC00FF)        // Lila neon
-    val neonPink = Color(0xFFFF0080)          // Rosa neon
-    val neonLightPink = Color(0xFFFF66B3)     // Rosa claro neon
-    val neonYellow = Color(0xFFFFFF00)        // Amarillo neon
-    val darkBackground = Color(0xFF0A0A0F)    // Fondo oscuro
-    val cardBackground = Color(0xFF1A1A2E)    // Fondo de tarjetas
+    val neonCyan = Color(0xFF00FFFF)
+    val neonBlue = Color(0xFF0099FF)
+    val neonAqua = Color(0xFF00FFCC)
+    val neonPurple = Color(0xFFCC00FF)
+    val neonPink = Color(0xFFFF0080)
+    val neonLightPink = Color(0xFFFF66B3)
+    val neonYellow = Color(0xFFFFFF00)
+    val darkBackground = Color(0xFF0A0A0F)
+    val cardBackground = Color(0xFF1A1A2E)
 
-    // Estados del formulario
     var tipo by remember { mutableStateOf("Ahorro") }
     var fecha by remember { mutableStateOf("") }
     var titulo by remember { mutableStateOf("") }
@@ -189,9 +189,12 @@ fun PopupTransaccion(
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.padding(vertical = 8.dp)
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .fillMaxHeight(0.85f)
+                    .verticalScroll(rememberScrollState())
             ) {
-                // Radio buttons para tipo
+
                 Card(
                     colors = CardDefaults.cardColors(
                         containerColor = cardBackground.copy(alpha = 0.7f)
@@ -254,7 +257,6 @@ fun PopupTransaccion(
                     }
                 }
 
-                // Campo fecha
                 OutlinedTextField(
                     value = fecha,
                     onValueChange = { fecha = it; error = null },
@@ -277,7 +279,6 @@ fun PopupTransaccion(
                     shape = RoundedCornerShape(12.dp)
                 )
 
-                // Campo título
                 OutlinedTextField(
                     value = titulo,
                     onValueChange = { titulo = it; error = null },
@@ -300,7 +301,6 @@ fun PopupTransaccion(
                     shape = RoundedCornerShape(12.dp)
                 )
 
-                // Campo cantidad
                 OutlinedTextField(
                     value = cantidad,
                     onValueChange = { cantidad = it; error = null },
@@ -323,7 +323,6 @@ fun PopupTransaccion(
                     shape = RoundedCornerShape(12.dp)
                 )
 
-                // Campo descripción
                 OutlinedTextField(
                     value = descripcion,
                     onValueChange = { descripcion = it; error = null },
@@ -346,7 +345,6 @@ fun PopupTransaccion(
                     shape = RoundedCornerShape(12.dp)
                 )
 
-                // Dropdown para categorías
                 Card(
                     colors = CardDefaults.cardColors(
                         containerColor = cardBackground.copy(alpha = 0.7f)
@@ -419,7 +417,6 @@ fun PopupTransaccion(
                     }
                 }
 
-                // Campo nueva categoría (condicional)
                 if (showNewCategoryField) {
                     OutlinedTextField(
                         value = nuevaCategoria,
@@ -444,7 +441,6 @@ fun PopupTransaccion(
                     )
                 }
 
-                // Mensaje de error
                 error?.let {
                     Card(
                         colors = CardDefaults.cardColors(

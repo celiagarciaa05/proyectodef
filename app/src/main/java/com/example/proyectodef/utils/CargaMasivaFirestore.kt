@@ -9,8 +9,6 @@ object CargaMasivaFirestore {
     private val categorias = listOf("Comida", "Salud", "Trabajo", "Ocio")
 
     suspend fun insertarDatos(userId: String) {
-        println("alabarran: Iniciando función insertarDatos para $userId")
-
         val db = FirebaseFirestore.getInstance()
         val batch = db.batch()
 
@@ -19,17 +17,14 @@ object CargaMasivaFirestore {
         val categoriasRef = db.collection("usuarios").document(userId).collection("categorias")
         val flagRef = db.collection("usuarios").document(userId).collection("banderas").document("datosPrueba")
 
-        // Verificar si ya se hizo la carga
         val flagSnapshot = flagRef.get().await()
         if (flagSnapshot.exists() && flagSnapshot.getBoolean("datosCargados") == true) {
-            println("alabarran: ⚠️ Los datos de prueba ya fueron insertados previamente.")
             return
         }
 
         val ahora = System.currentTimeMillis()
         val hace30Dias = ahora - 30L * 24 * 60 * 60 * 1000
 
-        println("alabarran: Insertando transacciones de ahorro")
         repeat(6) { i ->
             val fecha = if (i < 5) randomFechaReciente(hace30Dias, ahora) else randomFechaAntigua()
             val data = mapOf(
@@ -42,7 +37,6 @@ object CargaMasivaFirestore {
             batch.set(transRef.document(), data)
         }
 
-        println("alabarran: Insertando transacciones de gasto")
         repeat(9) { i ->
             val fecha = if (i < 6) randomFechaReciente(hace30Dias, ahora) else randomFechaAntigua()
             val data = mapOf(
@@ -55,7 +49,6 @@ object CargaMasivaFirestore {
             batch.set(transRef.document(), data)
         }
 
-        println("alabarran: Insertando metas")
         repeat(9) { i ->
             val tipo = if (i < 6) "Ahorro" else "Gasto"
             val estado = when {
@@ -74,7 +67,6 @@ object CargaMasivaFirestore {
             batch.set(metasRef.document(), data)
         }
 
-        println("alabarran: Insertando categorías")
         categorias.forEach { nombre ->
             val data = mapOf(
                 "nombre" to nombre,
@@ -83,16 +75,11 @@ object CargaMasivaFirestore {
             batch.set(categoriasRef.document(), data)
         }
 
-        // Marcar como cargado
         batch.set(flagRef, mapOf("datosCargados" to true))
-        println("alabarran: Guardando bandera de datosCargados")
 
         try {
             batch.commit().await()
-            println("alabarran: ✅ Datos de prueba insertados y marcados como cargados.")
         } catch (e: Exception) {
-            e.printStackTrace()
-            println("alabarran: ❌ Error al insertar datos: ${e.message}")
         }
     }
 

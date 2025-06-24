@@ -2,7 +2,6 @@ package com.example.proyectodef.data.repository
 
 import android.app.Activity
 import android.content.Intent
-import android.util.Log
 import com.example.proyectodef.model.User
 import com.google.android.gms.auth.api.signin.*
 import com.google.android.gms.common.api.ApiException
@@ -12,15 +11,12 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
 import com.google.firebase.firestore.ktx.firestore
 
-
-
 class AuthRepositoryImpl(private val activity: Activity) : AuthRepository {
 
     private val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
         .requestIdToken("269475319839-08uvmsjumi285adl45jnpoh8sbi99m7q.apps.googleusercontent.com")
         .requestEmail()
         .build()
-
 
     private val googleSignInClient = GoogleSignIn.getClient(activity, gso)
 
@@ -32,28 +28,20 @@ class AuthRepositoryImpl(private val activity: Activity) : AuthRepository {
         val task = GoogleSignIn.getSignedInAccountFromIntent(data)
         return try {
             val account = task.getResult(ApiException::class.java)
-            Log.d("Celia", "Celia dice: Google account obtenido: $account")
-
-            // Aquí firmamos en Firebase con el token de Google
             val credential = com.google.firebase.auth.GoogleAuthProvider.getCredential(account.idToken, null)
             val authResult = Firebase.auth.signInWithCredential(credential).await()
             val firebaseUser = authResult.user
-            Log.d("Celia", "Celia dice: FirebaseUser tras signInWithCredential: $firebaseUser")
-
             if (firebaseUser == null) {
                 return Result.failure(Exception("Error al autenticar con Firebase"))
             }
 
             val userId = firebaseUser.uid
-
             val db = Firebase.firestore
             val docRef = db.collection("usuarios").document(userId)
             val snapshot = docRef.get().await()
-
             val userFromFirestore = snapshot.toObject(User::class.java)
 
             return if (userFromFirestore != null) {
-                Log.d("Celia", "Celia dice: Usuario Firestore obtenido: $userFromFirestore")
                 Result.success(userFromFirestore)
             } else {
                 val newUser = User(
@@ -65,13 +53,10 @@ class AuthRepositoryImpl(private val activity: Activity) : AuthRepository {
                     password = "",
                     photoUrl = account.photoUrl?.toString()
                 )
-
                 docRef.set(newUser).await()
-                Log.d("Celia", "Celia dice: Nuevo usuario creado en Firestore: $newUser")
                 Result.success(newUser)
             }
         } catch (e: Exception) {
-            Log.d("Celia", "Celia dice: Error en handleSignInResult: ${e.message}")
             Result.failure(e)
         }
     }
@@ -81,14 +66,8 @@ class AuthRepositoryImpl(private val activity: Activity) : AuthRepository {
             val result = Firebase.auth.signInWithEmailAndPassword(email, password).await()
             val user = result.user
             if (user != null) {
-                val snapshot = Firebase.firestore
-                    .collection("usuarios")
-                    .document(user.uid)
-                    .get()
-                    .await()
-
+                val snapshot = Firebase.firestore.collection("usuarios").document(user.uid).get().await()
                 val userFromFirestore = snapshot.toObject(User::class.java)
-
                 if (userFromFirestore != null) {
                     Result.success(userFromFirestore)
                 } else {
@@ -109,7 +88,6 @@ class AuthRepositoryImpl(private val activity: Activity) : AuthRepository {
         }
     }
 
-
     override suspend fun registerUser(
         nombreCompleto: String,
         nombreUsuario: String,
@@ -119,7 +97,6 @@ class AuthRepositoryImpl(private val activity: Activity) : AuthRepository {
         return try {
             val result = Firebase.auth.createUserWithEmailAndPassword(correo, password).await()
             val user = result.user
-
             if (user != null) {
                 val newUser = User(
                     userId = user.uid,
@@ -131,13 +108,8 @@ class AuthRepositoryImpl(private val activity: Activity) : AuthRepository {
                     photoUrl = user.photoUrl?.toString()
                 )
 
-                // Guardar en Firestore
                 val db = Firebase.firestore
-                db.collection("usuarios")
-                    .document(user.uid)
-                    .set(newUser)
-                    .await()
-
+                db.collection("usuarios").document(user.uid).set(newUser).await()
                 Result.success(newUser)
             } else {
                 Result.failure(Exception("Error al registrar el usuario"))
@@ -153,39 +125,29 @@ class AuthRepositoryImpl(private val activity: Activity) : AuthRepository {
             Result.failure(e)
         }
     }
-    override suspend fun getUserFromFirestore(userId: String): User? {
-        val snapshot = Firebase.firestore
-            .collection("usuarios")
-            .document(userId)
-            .get()
-            .await()
 
+    override suspend fun getUserFromFirestore(userId: String): User? {
+        val snapshot = Firebase.firestore.collection("usuarios").document(userId).get().await()
         return snapshot.toObject(User::class.java)
     }
-    // AuthRepositoryImpl
+
     override suspend fun actualizarCampoUsuario(userId: String, campo: String, valor: Any) {
-        Firebase.firestore.collection("usuarios")
-            .document(userId)
-            .update(campo, valor)
-            .await()
+        Firebase.firestore.collection("usuarios").document(userId).update(campo, valor).await()
     }
 
     override suspend fun resetearCuentaUsuario(userId: String) {
         val db = Firebase.firestore
         db.collection("usuarios").document(userId).update("dineroTotal", 0.0).await()
-        db.collection("usuarios").document(userId).collection("transacciones")
-            .get().await().documents.forEach {
+        db.collection("usuarios").document(userId).collection("transacciones").get().await().documents.forEach {
                 it.reference.delete().await()
             }
-        db.collection("usuarios").document(userId).collection("categorias")
-            .get().await().documents.forEach {
+        db.collection("usuarios").document(userId).collection("categorias").get().await().documents.forEach {
                 it.reference.delete().await()
             }
     }
 
     override suspend fun eliminarCuentaFirebase(userId: String) {
-        Firebase.firestore.collection("usuarios")
-            .document(userId).delete().await()
+        Firebase.firestore.collection("usuarios").document(userId).delete().await()
     }
 
     override fun signOut() {
@@ -194,11 +156,6 @@ class AuthRepositoryImpl(private val activity: Activity) : AuthRepository {
     }
 
     override suspend fun actualizarDineroUsuario(userId: String, nuevoDinero: Double) {
-        Firebase.firestore
-            .collection("usuarios")
-            .document(userId)
-            .update("dineroTotal", nuevoDinero)
-            .await()
+        Firebase.firestore.collection("usuarios").document(userId).update("dineroTotal", nuevoDinero).await()
     }
-
 }

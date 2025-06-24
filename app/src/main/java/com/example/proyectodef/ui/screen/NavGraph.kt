@@ -26,7 +26,6 @@ fun AppNavGraph(
     val isLoggedIn = userState != null
 
     val metaViewModel = remember {
-        Log.d("garcia", "MetaViewModel creado en AppNavGraph")
         MetaViewModel(MetaRepositoryImpl())
     }
 
@@ -35,37 +34,31 @@ fun AppNavGraph(
         startDestination = "splash"
     ) {
         composable("splash") {
-            Log.d("garcia", "Ruta: splash")
             SplashScreen(navController = navController, authViewModel = authViewModel)
         }
 
         composable("login") {
-            Log.d("garcia", "Ruta: login")
             LoginScreen(authViewModel = authViewModel, navController = navController, metaViewModel = metaViewModel)
         }
 
         composable("register") {
-            Log.d("garcia", "Ruta: register")
             RegisterScreen(authViewModel = authViewModel, navController = navController)
         }
 
         composable("home") {
-            Log.d("garcia", "Ruta: home")
-
             val progresoViewModel: ProgresoViewModel = viewModel()
 
             HomeScreen(
                 authViewModel = authViewModel,
                 transactionViewModel = transactionViewModel,
                 metaViewModel = metaViewModel,
-                progresoViewModel = progresoViewModel, // ✅ AÑADIDO
+                progresoViewModel = progresoViewModel,
                 navController = navController
             )
         }
 
 
         composable("miCuenta") {
-            Log.d("garcia", "Ruta: miCuenta")
             MiCuentaScreen(
                 authViewModel = authViewModel,
                 navController = navController,
@@ -75,7 +68,6 @@ fun AppNavGraph(
 
         composable("transacciones/{tipo}") { backStackEntry ->
             val tipo = backStackEntry.arguments?.getString("tipo") ?: "Gasto"
-            Log.d("garcia", "Ruta: transacciones/$tipo")
             TransaccionesScreen(
                 tipo = tipo,
                 authViewModel = authViewModel,
@@ -85,7 +77,6 @@ fun AppNavGraph(
         }
 
         composable("metas") {
-            Log.d("garcia", "Ruta: metas")
             MetasScreen(
                 authViewModel = authViewModel,
                 metaViewModel = metaViewModel,
@@ -95,7 +86,6 @@ fun AppNavGraph(
         }
 
         composable("gestionMetas") {
-            Log.d("garcia", "Ruta: gestionMetas")
             GestionMetasScreen(
                 authViewModel = authViewModel,
                 metaViewModel = metaViewModel,
@@ -104,9 +94,7 @@ fun AppNavGraph(
         }
 
         composable("chatbot") {
-            Log.d("garcia", "Ruta: chatbot")
             val chatViewModel = remember {
-                Log.d("garcia", "ChatViewModel creado")
                 ChatViewModel()
             }
 

@@ -36,16 +36,15 @@ import java.text.SimpleDateFormat
 import java.text.DecimalFormat
 import java.util.*
 
-// Paleta de colores neón
 object NeonColors {
-    val CelesteFrio = Color(0xFF00F5FF)        // Celeste neón
-    val RosaClaro = Color(0xFFFFB6C1)          // Rosa claro
-    val RosaFuscia = Color(0xFFFF1493)         // Rosa fucsia
-    val AzulElectrico = Color(0xFF0080FF)      // Azul eléctrico
-    val VerdeAgua = Color(0xFF00FFFF)          // Verde agua/cyan
-    val Lila = Color(0xFFDA70D6)               // Lila
-    val FondoOscuro = Color(0xFF0A0A0F)        // Fondo muy oscuro
-    val FondoTarjeta = Color(0xFF1A1A2E)       // Fondo de tarjetas
+    val CelesteFrio = Color(0xFF00F5FF)
+    val RosaClaro = Color(0xFFFFB6C1)
+    val RosaFuscia = Color(0xFFFF1493)
+    val AzulElectrico = Color(0xFF0080FF)
+    val VerdeAgua = Color(0xFF00FFFF)
+    val Lila = Color(0xFFDA70D6)
+    val FondoOscuro = Color(0xFF0A0A0F)
+    val FondoTarjeta = Color(0xFF1A1A2E)
     val Blanco = Color(0xFFFFFFFF)
 }
 
@@ -63,17 +62,14 @@ fun TransaccionesScreen(
     val userId = user?.userId.orEmpty()
     val dineroTotal = user?.dineroTotal ?: 0.0
     val transacciones by transactionViewModel.transaccionesFiltradas.collectAsState()
-
-    // Formateador para mostrar números con 2 decimales
     val decimalFormat = remember { DecimalFormat("#,##0.00") }
-
     var selectedTransaction by remember { mutableStateOf<Transaction?>(null) }
     var showDialog by remember { mutableStateOf(false) }
     var showConfirmDelete by remember { mutableStateOf(false) }
 
     LaunchedEffect(userId, tipo) {
         if (userId.isNotBlank()) {
-            transactionViewModel.cargarTransaccionesPorTipo(userId, tipo)
+            transactionViewModel.cargarTransaccionesPorTipo(userId, tipo.lowercase())
         }
     }
 
@@ -98,7 +94,6 @@ fun TransaccionesScreen(
                     )
                 )
         ) {
-            // Efectos de fondo con blur
             Box(
                 modifier = Modifier
                     .offset(x = 100.dp, y = 150.dp)

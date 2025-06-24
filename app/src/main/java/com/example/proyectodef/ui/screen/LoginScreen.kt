@@ -37,12 +37,19 @@ fun LoginScreen(authViewModel: AuthViewModel, navController: NavController, meta
     val error by authViewModel.errorMessage.collectAsState()
     val success by authViewModel.successMessage.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(error) {
+        error?.let {
+            snackbarHostState.showSnackbar(it)
+            authViewModel.clearMessages()
+        }
+    }
+
     var showResetPopup by remember { mutableStateOf(false) }
 
     var emailOrUser by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    // Observa cambios en el user para navegar automáticamente cuando haya sesión iniciada
     LaunchedEffect(user) {
         if (user != null) {
             navController.navigate("home") {
@@ -61,7 +68,6 @@ fun LoginScreen(authViewModel: AuthViewModel, navController: NavController, meta
         }
     }
 
-    // Fondo dinámico animado
     val infiniteTransition = rememberInfiniteTransition()
     val animatedOffset by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -87,7 +93,6 @@ fun LoginScreen(authViewModel: AuthViewModel, navController: NavController, meta
                 )
             )
     ) {
-        // Esferas decorativas futuristas
         Canvas(modifier = Modifier.fillMaxSize()) {
             drawCircle(
                 color = Color(0xFF00BFFF).copy(alpha = 0.1f),
@@ -101,7 +106,6 @@ fun LoginScreen(authViewModel: AuthViewModel, navController: NavController, meta
             )
         }
 
-        // Formulario de login
         Scaffold(
             snackbarHost = { SnackbarHost(snackbarHostState) },
             containerColor = Color.Transparent,
